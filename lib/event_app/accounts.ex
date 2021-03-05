@@ -37,6 +37,16 @@ defmodule EventApp.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  # Based on Nat Tuck's Lecture Notes and Code
+  # See:
+  # https://github.com/NatTuck/scratch-2021-01/blob/master/notes-4550/11-photoblog/notes.md
+  # https://github.com/NatTuck/scratch-2021-01/blob/master/4550/0223/photo_blog/lib/photo_blog/users.ex
+  def get_user(id), do: Repo.get(User, id)
+
+  def get_user_by_name(name) do
+    Repo.get_by!(User, name: name)
+  end
+
   @doc """
   Creates a user.
 

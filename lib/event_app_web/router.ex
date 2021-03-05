@@ -1,3 +1,7 @@
+# based on Nat Tuck's Lecture Notes and Example Code
+# See:
+# https://github.com/NatTuck/scratch-2021-01/blob/master/notes-4550/11-photoblog/notes.md
+# https://github.com/NatTuck/scratch-2021-01/blob/master/4550/0223/photo_blog/lib/photo_blog_web/router.ex
 defmodule EventAppWeb.Router do
   use EventAppWeb, :router
 
@@ -7,6 +11,7 @@ defmodule EventAppWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug EventAppWeb.Plugs.FetchUser
   end
 
   pipeline :api do
@@ -19,6 +24,8 @@ defmodule EventAppWeb.Router do
     get "/", PageController, :index
     resources "/events", EventController
     resources "/users", UserController
+    resources "/sessions", SessionController,
+      only: [:create, :delete], singleton: true
   end
 
   # Other scopes may use custom stacks.
