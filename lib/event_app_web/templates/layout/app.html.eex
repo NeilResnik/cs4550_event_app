@@ -9,25 +9,85 @@
     <script defer type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </head>
   <body>
-    <header>
-      <section class="container">
-        <nav role="navigation">
-          <ul>
-            <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
-            <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
-              <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
+    <div role="main" class="container">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container fluid">
+          <button class="navbar-toggler"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#navbarSupportedContent"
+                  aria-controls="navbarSupportedContent"
+                  aria-expanded="false"
+                  aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
+            <ul class="navbar-nav">
+              <%= if @conn.request_path == "/" do %>
+                <li class="nav-item">
+                  <%= link "Home", to: "/", class: "nav-link active", "aria-current": "page" %>
+                </li>
+              <% else %>
+                <li class="nav-item">
+                  <%= link "Home", to: "/", class: "nav-link" %>
+                </li>
+              <% end %>
+              <%= if @conn.request_path == "/events" do %>
+                <li class="nav-item">
+                  <%= link "Events", to: Routes.event_path(@conn, :index), class: "nav-link active", "aria-current": "page" %>
+                </li>
+              <% else %>
+                <li class="nav-item">
+                  <%= link "Events", to: Routes.event_path(@conn, :index), class: "nav-link" %>
+                </li>
+              <% end %>
+              <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
+                <li class="nav-item">
+                  <%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home), class: "nav-link", target: "_blank" %>
+                </li>
+              <% end %>
+            <%= if !@conn.assigns[:current_user] do %>
+              <%= if @conn.request_path == "/users/new" do %>
+                <li class="nav-item">
+                  <%= link "Register", to: Routes.user_path(@conn, :new), class: "nav-link active", "aria-current": "page" %>
+                </li>
+              <% else %>
+                <li class="nav-item">
+                  <%= link "Register", to: Routes.user_path(@conn, :new), class: "nav-link" %>
+                </li>
+              <% end %>
             <% end %>
+            </ul>
+            <ul class="navbar-nav">
+              <%= if @conn.assigns[:current_user] do %>
+                <li class="navbar-text">
+                  User: <%= @current_user.name %>
+                </li>
+                <li class="nav-item">
+                  <%= link "Logout", to: Routes.session_path(@conn, :delete), method: :delete, class: "nav-link" %>
+                </li>
+              </div>
+              <% else %>
+                <li class="nav-item">
+                  <%= form_for @conn,
+                               Routes.session_path(@conn, :create),
+                               [class: "d-flex form-inline"],
+                               fn f -> %>
+                    <%= text_input f, :name, class: "nav-form", placeholder: "Email" %>
+                    <%= submit "Login", class: "btn btn-outline-secondary" %>
+                  <% end %>
+                </li>
+              <% end %>
           </ul>
-        </nav>
-        <a href="https://phoenixframework.org/" class="phx-logo">
-          <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo"/>
-        </a>
-      </section>
-    </header>
-    <main role="main" class="container">
-      <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-      <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+        </div>
+      </nav>
+      <%= if get_flash(@conn, :info) do %>
+        <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
+      <% end %>
+      <%= if get_flash(@conn, :error) do %>
+        <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+      <% end %>
       <%= @inner_content %>
-    </main>
+    </div>
   </body>
 </html>

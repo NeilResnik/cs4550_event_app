@@ -3,9 +3,9 @@ defmodule EventApp.Events.Event do
   import Ecto.Changeset
 
   schema "events" do
-    field :date, :date
-    field :description, :string
-    field :name, :string
+    field :date, :date, null: false
+    field :description, :string, null: false
+    field :name, :string, null: false
 
     timestamps()
   end
