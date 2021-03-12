@@ -46,7 +46,7 @@
                   <%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home), class: "nav-link", target: "_blank" %>
                 </li>
               <% end %>
-            <%= if !@conn.assigns[:current_user] do %>
+            <%= if !have_current_user?(@conn) do %>
               <%= if @conn.request_path == "/users/new" do %>
                 <li class="nav-item">
                   <%= link "Register", to: Routes.user_path(@conn, :new), class: "nav-link active", "aria-current": "page" %>
@@ -59,7 +59,7 @@
             <% end %>
             </ul>
             <ul class="navbar-nav">
-              <%= if @conn.assigns[:current_user] do %>
+              <%= if have_current_user?(@conn) do %>
                 <li class="navbar-text">
                   User: <%= @current_user.name %>
                 </li>

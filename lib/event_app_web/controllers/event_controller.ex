@@ -3,6 +3,33 @@ defmodule EventAppWeb.EventController do
 
   alias EventApp.Events
   alias EventApp.Events.Event
+  alias EventAppWeb.Plugs
+
+  # Based on Nat Tucks Lecture Code
+  # See: https://github.com/NatTuck/scratch-2021-01/blob/master/4550/0302/photo_blog/lib/photo_blog_web/controllers/post_controller.ex
+  plug Plugs.RequireUser when action in [:new, :edit, :create, :update]
+  plug :fetch_post when action in [:show, :edit, :update, :delete]
+  plug :require_owner when action in [:edit, :update, :delete]
+
+  def fetch_post(conn, _args) do 
+    id = conn.params["id"]
+    event = Events.get_event!(id)
+    assign(conn, :event, event)
+  end
+
+  def require_owner(conn, _args) do
+    # We must have these assings or things break
+    user = conn.assigns[:current_user]
+    event = conn.assigns[:event]
+    if user.id == event.user_id do
+      conn
+    else
+      conn
+      |> put_flash(:error, "Must be creator to do that action!")
+      |> redirect(to: Routes.page_path(conn, :index))
+      |> halt()
+    end
+  end
 
   def index(conn, _params) do
     events = Events.list_events()
@@ -15,6 +42,8 @@ defmodule EventAppWeb.EventController do
   end
 
   def create(conn, %{"event" => event_params}) do
+    event_params = event_params
+                   |> Map.put("user_id", conn.assigns[:current_user].id)
     case Events.create_event(event_params) do
       {:ok, event} ->
         conn

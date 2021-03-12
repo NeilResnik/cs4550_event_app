@@ -16,8 +16,14 @@
     <strong>Description:</strong>
     <%= @event.description %>
   </li>
+  <li>
+    <strong>Posted By:</strong>
+    <%= @event.user.name %>
 
 </ul>
 
-<span><%= link "Edit", to: Routes.event_path(@conn, :edit, @event) %></span>
-<span><%= link "Back", to: Routes.event_path(@conn, :index) %></span>
+<%= if current_user_is?(@conn, @event.user) do %>
+  <span><%= link "Edit", to: Routes.event_path(@conn, :edit, @event) %></span>
+  <span><%= link "Delete", to: Routes.event_path(@conn, :delete, @event), method: :delete, data: [confirm: "Are you sure?"] %></span>
+<% end %>
+  <span><%= link "Back", to: Routes.event_path(@conn, :index) %></span>
