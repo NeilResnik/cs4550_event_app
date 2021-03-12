@@ -28,6 +28,67 @@
 <% end %>
 <span><%= link "Back", to: Routes.event_path(@conn, :index) %></span>
 
+<%= if current_user_is?(@conn, @event.user) do %>
+  <%= render(EventAppWeb.InviteView,
+             "form.html",
+             changeset: @new_invite,
+             action: Routes.invite_path(@conn, :create)) %>
+             <p> Link: <%= Routes.event_invitee_path(@conn, :invitee, @event) %> </p>
+<% end %>
+
+
+
+<h1> Invites </h1>
+<div class="row">
+  <div class="col-sm">
+    Coming:
+    <%= Enum.reduce(@event.invites, 0, fn inv, acc -> if inv.status == :yes do acc + 1 else acc end end) %>
+  </div>
+  <div class="col-sm">
+    Not Coming:
+    <%= Enum.reduce(@event.invites, 0, fn inv, acc -> if inv.status == :no do acc + 1 else acc end end) %>
+  </div>
+  <div class="col-sm">
+    Maybe Coming: <%= Enum.reduce(@event.invites, 0, fn inv, acc -> if inv.status == :maybe do acc + 1 else acc end end) %>
+  </div>
+</div>
+<%= if current_user_invited?(@conn, @event) || current_user_is?(@conn, @event.user) do %>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">User</th>
+        <th scope="col">Status</th>
+
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= for inv <- @event.invites do %>
+        <tr>
+          <td><%= get_user_name_from_email(inv.user_email) %></td>
+          <td><%= inv.status %></td>
+          
+          <%= if invited_user?(@conn, inv) do %>
+            <td>
+              <%= form_for get_inv_changeset(inv),
+                  Routes.invite_path(@conn, :update, inv),
+                  [class: "d-flex form-inline"],
+                  fn f -> %>
+                  <%= select f,
+                      :status,
+                      [{"Yes", :yes}, {"No", :no}, {"Maybe", :maybe}],
+                      prompt: "Coming?" %>
+                  <%= submit "Submit", class: "btn btn-outline-secondary" %>
+                <% end %>
+            </td>
+          <% else %>
+            <td></td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
 
 <h1>Comments</h1>
 <%= for comm <- @event.comments do %>
@@ -49,7 +110,7 @@
   </div>
 <% end %>
 
-<%= if have_current_user?(@conn) do %>
+<%= if current_user_invited?(@conn, @event) do %>
   <h2>Add Comment</h2>
   <%= render(EventAppWeb.CommentView,
              "form.html",

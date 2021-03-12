@@ -12,6 +12,10 @@ defmodule EventApp.Events do
     Repo.preload(event, [comments: :user])
   end
 
+  def load_invites(%Event{} = event) do
+    Repo.preload(event, :invites)
+  end
+
   @doc """
   Returns the list of events.
 

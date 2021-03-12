@@ -4,6 +4,7 @@ defmodule EventAppWeb.EventController do
   alias EventApp.Events
   alias EventApp.Events.Event
   alias EventApp.Comments
+  alias EventApp.Invites
   alias EventAppWeb.Helpers
   alias EventAppWeb.Plugs
 
@@ -33,6 +34,18 @@ defmodule EventAppWeb.EventController do
     end
   end
 
+  def invitee(conn, %{"event_id" => id}) do
+    user = conn.assigns[:current_user]
+    if user == nil do
+      redirect(conn, to: Routes.user_path(conn, :new))
+      |> redirect(to: Routes.event_path(conn, :show, id))
+      |> halt()
+    else
+      redirect(conn, to: Routes.event_path(conn, :show, id))
+    end
+  end
+
+
   def index(conn, _params) do
     events = Events.list_events()
     render(conn, "index.html", events: events)
@@ -60,12 +73,18 @@ defmodule EventAppWeb.EventController do
   def show(conn, %{"id" => _id}) do
     event = conn.assigns[:event]
             |> Events.load_comments()
+            |> Events.load_invites()
     comm = %Comments.Comment{
       event_id: event.id,
       user_id: Helpers.current_user_id(conn)
     }
+    inv = %Invites.Invite{
+      event_id: event.id,
+      status: :no_response,
+    }
     new_comment = Comments.change_comment(comm)
-    render(conn, "show.html", event: event, new_comment: new_comment)
+    new_invite = Invites.change_invite(inv)
+    render(conn, "show.html", event: event, new_comment: new_comment, new_invite: new_invite)
   end
 
   def edit(conn, %{"id" => id}) do

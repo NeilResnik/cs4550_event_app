@@ -19,4 +19,35 @@ defmodule EventAppWeb.Helpers do
   def current_user_is?(conn, user_id) do
     current_user_id(conn) == user_id
   end
+
+  def get_user_name_from_email(email) do
+    user = EventApp.Accounts.get_user_by_email(email)
+    if user != nil do
+      user.name
+    else
+      email
+    end
+  end
+
+  def current_user_invited?(conn, event) do
+    user = conn.assigns[:current_user]
+    if user != nil do
+      Enum.any?(event.invites, fn inv -> inv.user_email == user.email end)
+    else
+      false
+    end
+  end
+
+  def invited_user?(conn, inv) do
+    user = conn.assigns[:current_user]
+    if user != nil do
+      EventApp.Accounts.get_user_by_email(inv.user_email) == conn.assigns[:current_user]
+    else
+      false
+    end
+  end
+
+  def get_inv_changeset(inv) do
+    EventApp.Invites.change_invite(inv)
+  end
 end
