@@ -26,4 +26,33 @@
   <span><%= link "Edit", to: Routes.event_path(@conn, :edit, @event) %></span>
   <span><%= link "Delete", to: Routes.event_path(@conn, :delete, @event), method: :delete, data: [confirm: "Are you sure?"] %></span>
 <% end %>
-  <span><%= link "Back", to: Routes.event_path(@conn, :index) %></span>
+<span><%= link "Back", to: Routes.event_path(@conn, :index) %></span>
+
+
+<h1>Comments</h1>
+<%= for comm <- @event.comments do %>
+  <div class="card">
+    <div class="card-body">
+      <h6 class="card-title">
+        Author: <%= comm.user.name %>
+      </h6>
+      <p class="card-text">
+        <%= comm.body %>
+      </p>
+      <%= if current_user_is?(@conn, comm.user) do %>
+        <%= link "edit", to: Routes.comment_path(@conn, :edit, comm), class: "card-link" %>
+      <% end %>
+      <%= if current_user_is?(@conn, comm.user) || current_user_is?(@conn, @event.user) do %>
+        <%= link "delete", to: Routes.comment_path(@conn, :delete, comm), method: :delete, data: [confirm: "Are you sure?"], class: "card-link" %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<%= if have_current_user?(@conn) do %>
+  <h2>Add Comment</h2>
+  <%= render(EventAppWeb.CommentView,
+             "form.html",
+             changeset: @new_comment,
+             action: Routes.comment_path(@conn, :create))%>
+<% end %>

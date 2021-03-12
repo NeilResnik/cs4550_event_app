@@ -3,6 +3,8 @@ defmodule EventAppWeb.EventController do
 
   alias EventApp.Events
   alias EventApp.Events.Event
+  alias EventApp.Comments
+  alias EventAppWeb.Helpers
   alias EventAppWeb.Plugs
 
   # Based on Nat Tucks Lecture Code
@@ -18,7 +20,7 @@ defmodule EventAppWeb.EventController do
   end
 
   def require_owner(conn, _args) do
-    # We must have these assings or things break
+    # We must have these assigns or things break
     user = conn.assigns[:current_user]
     event = conn.assigns[:event]
     if user.id == event.user_id do
@@ -55,9 +57,15 @@ defmodule EventAppWeb.EventController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    event = Events.get_event!(id)
-    render(conn, "show.html", event: event)
+  def show(conn, %{"id" => _id}) do
+    event = conn.assigns[:event]
+            |> Events.load_comments()
+    comm = %Comments.Comment{
+      event_id: event.id,
+      user_id: Helpers.current_user_id(conn)
+    }
+    new_comment = Comments.change_comment(comm)
+    render(conn, "show.html", event: event, new_comment: new_comment)
   end
 
   def edit(conn, %{"id" => id}) do

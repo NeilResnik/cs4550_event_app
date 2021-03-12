@@ -8,6 +8,10 @@ defmodule EventApp.Events do
 
   alias EventApp.Events.Event
 
+  def load_comments(%Event{} = event) do 
+    Repo.preload(event, [comments: :user])
+  end
+
   @doc """
   Returns the list of events.
 

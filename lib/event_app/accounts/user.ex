@@ -3,9 +3,10 @@ defmodule EventApp.Accounts.User do
   import Ecto.Changeset
 
   schema "users" do
-    field :email, :string, null: false
-    field :name, :string, null: false
+    field :email, :string
+    field :name, :string
     has_many :events, EventApp.Events.Event
+    has_many :comments, EventApp.Comments.Comment
 
     timestamps()
   end
